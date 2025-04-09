@@ -1,3 +1,4 @@
+import { isUint8Array } from "util/types";
 import { CRLF } from "./contants";
 import type { HttpHeaders } from "./http_header";
 
@@ -37,9 +38,16 @@ function buildDefaultHeader(res: any, headers: HttpHeaders): HttpHeaders {
     if (typeof (res) == "string") {
         contentLength = res.length
         conenteType = "text/plain"
+    } else if (isUint8Array(res)) {
+        contentLength = res.length
+        conenteType = "application/octet-stream"
     }
 
+
     headers.set("Content-Length", contentLength.toString())
-    headers.set("Content-Type", conenteType)
+    if (!headers.has("Content-Type")) {
+        headers.set("Content-Type", conenteType)
+    }
+
     return headers;
 }
