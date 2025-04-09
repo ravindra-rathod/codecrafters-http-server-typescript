@@ -10,17 +10,25 @@ export interface HTTPResponse {
 
 
 export function buildResponse(res: HTTPResponse): string {
-
+    const body = processResponseBody(res.body);
     const statusLine = `HTTP/1.1 ${res.statusCode} ${res.reason}${CRLF}`;
     const headers = buildDefaultHeader(res.body, res.header);
 
     const headersStr = `${headers.getHeadersString()}${CRLF}${CRLF}`
-    const body = res.body ?? "";
+
 
     var response = statusLine + headersStr + body;
     console.log("Returning Reponse")
     console.log(JSON.stringify({ response }))
     return response;
+}
+
+function processResponseBody(resbody: any): any {
+    var res = resbody ?? ""
+    if (typeof (res) == "string") {
+        res = res.trim();
+    }
+    return res
 }
 
 function buildDefaultHeader(res: any, headers: HttpHeaders): HttpHeaders {
