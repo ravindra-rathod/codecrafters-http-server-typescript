@@ -22,8 +22,7 @@ const server = net.createServer((socket) => {
                 body: decodeURI(echoString),
                 header: new HttpHeaders()
             }
-        }
-        if (req.path == "/user-agent" && req.httpMethod == "GET") {
+        } else if (req.path == "/user-agent" && req.httpMethod == "GET") {
             res = {
                 statusCode: 200,
                 reason: "OK",
