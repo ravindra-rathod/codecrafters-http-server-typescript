@@ -12,7 +12,7 @@ export interface HTTPResponse {
 export function buildResponse(res: HTTPResponse): string {
     const body = processResponseBody(res.body);
     const statusLine = `HTTP/1.1 ${res.statusCode} ${res.reason}${CRLF}`;
-    const headers = buildDefaultHeader(res.body, res.header);
+    const headers = buildDefaultHeader(body, res.header);
 
     const headersStr = `${headers.getHeadersString()}${CRLF}${CRLF}`
 
@@ -26,7 +26,7 @@ export function buildResponse(res: HTTPResponse): string {
 function processResponseBody(resbody: any): any {
     var res = resbody ?? ""
     if (typeof (res) == "string") {
-        res = res.trim();
+        res = res.trim()
     }
     return res
 }
