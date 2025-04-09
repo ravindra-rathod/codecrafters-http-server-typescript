@@ -20,7 +20,17 @@ const server = net.createServer((socket) => {
         console.log("Request came", req);
 
         var res: HTTPResponse
-        if (req.path.startsWith("/files") && req.httpMethod == "GET") {
+        if (req.path.startsWith("/files") && req.httpMethod == "POST") {
+            var filename = decodeURI(req.path.replace("/files/", ""))
+            var file = Bun.file(`${storageDir}/${filename}`)
+            await Bun.write(file, req.body)
+            res = {
+                statusCode: 201,
+                reason: "Created",
+                header: new HttpHeaders()
+            }
+        }
+        else if (req.path.startsWith("/files") && req.httpMethod == "GET") {
             var filename = decodeURI(req.path.replace("/files/", ""))
             var file = Bun.file(`${storageDir}/${filename}`)
 
