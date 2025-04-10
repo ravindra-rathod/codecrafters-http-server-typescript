@@ -10,6 +10,11 @@ export interface HTTPResponse {
     header: HttpHeaders
 }
 
+function hexdump (data: Uint8Array, bytesPerLine = 16): string {
+    const hex = Array.from(data, byte => byte.toString(16))
+    .join(' ')
+    return hex;
+  }
 
 export function buildResponse(res: HTTPResponse, req: HttpRequest): string {
     var body = processResponseBody(res.body);
@@ -18,7 +23,11 @@ export function buildResponse(res: HTTPResponse, req: HttpRequest): string {
     if(req.headers.get(Header.Accept_Encoding)?.includes("gzip")){
         headers.set(Header.Content_Encoding,"gzip")
         const data = Buffer.from(body);
-        body = Bun.gzipSync(body).join(" ");
+        const compressedBody = Bun.gzipSync(body,{
+        });
+        body = hexdump(compressedBody)
+        headers.set(Header.Content_Length,compressedBody.length.toString())
+
     }
     buildDefaultHeader(body, headers)
     console.log("headrs ==> ",headers)
@@ -45,15 +54,18 @@ function buildDefaultHeader(res: any, headers: HttpHeaders): HttpHeaders {
     if (typeof (res) == "string") {
         contentLength = res.length
         conenteType = ContentType.text_plain
-    } else if (isUint8Array(res)) {
-        contentLength = res.length
-        conenteType = ContentType.application_octet_stream
-    }
+    } 
+    // else if (isUint8Array(res)) {
+    //     contentLength = res.length
+    //     conenteType = ContentType.application_octet_stream
+    // }
 
 
-    headers.set(Header.Content_Length, contentLength.toString())
     if (!headers.has(Header.Content_Type)) {
         headers.set(Header.Content_Type, conenteType)
+    }
+    if (!headers.has(Header.Content_Length)) {
+        headers.set(Header.Content_Length, contentLength.toString())
     }
 
     return headers;
