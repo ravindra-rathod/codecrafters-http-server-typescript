@@ -1,6 +1,7 @@
 import { isUint8Array } from "util/types";
 import { CRLF } from "./contants";
-import type { HttpHeaders } from "./http_header";
+import { ContentType, Header,  HttpHeaders } from "./http_header";
+import type { HttpRequest } from "./http_request";
 
 export interface HTTPResponse {
     statusCode: number,
@@ -10,17 +11,23 @@ export interface HTTPResponse {
 }
 
 
-export function buildResponse(res: HTTPResponse): string {
-    const body = processResponseBody(res.body);
+export function buildResponse(res: HTTPResponse, req: HttpRequest): string {
+    var body = processResponseBody(res.body);
     const statusLine = `HTTP/1.1 ${res.statusCode} ${res.reason}${CRLF}`;
-    const headers = buildDefaultHeader(body, res.header);
-
+    const headers = res.header;
+    if(req.headers.get(Header.Accept_Encoding)?.includes("gzip")){
+        headers.set(Header.Content_Encoding,"gzip")
+        const data = Buffer.from(body);
+        body = Bun.gzipSync(body).join(" ");
+    }
+    buildDefaultHeader(body, headers)
+    console.log("headrs ==> ",headers)
     const headersStr = `${headers.getHeadersString()}${CRLF}${CRLF}`
 
 
     var response = statusLine + headersStr + body;
     console.log("Returning Reponse")
-    console.log(JSON.stringify({ response }))
+    console.log(response)
     return response;
 }
 
@@ -37,16 +44,16 @@ function buildDefaultHeader(res: any, headers: HttpHeaders): HttpHeaders {
     var contentLength: number = 0;
     if (typeof (res) == "string") {
         contentLength = res.length
-        conenteType = "text/plain"
+        conenteType = ContentType.text_plain
     } else if (isUint8Array(res)) {
         contentLength = res.length
-        conenteType = "application/octet-stream"
+        conenteType = ContentType.application_octet_stream
     }
 
 
-    headers.set("Content-Length", contentLength.toString())
-    if (!headers.has("Content-Type")) {
-        headers.set("Content-Type", conenteType)
+    headers.set(Header.Content_Length, contentLength.toString())
+    if (!headers.has(Header.Content_Type)) {
+        headers.set(Header.Content_Type, conenteType)
     }
 
     return headers;

@@ -2,7 +2,7 @@ import * as net from "net";
 import { parseRequest } from "./http_request";
 import { buildResponse, type HTTPResponse } from "./http_response";
 import { url } from "inspector";
-import { HttpHeaders } from "./http_header";
+import { ContentType, Header, HttpHeaders } from "./http_header";
 import path from "path";
 import { file } from "bun";
 import { isUint8Array } from "util/types";
@@ -38,7 +38,7 @@ const server = net.createServer((socket) => {
 
                 var content = await file.text()
                 var header = new HttpHeaders();
-                header.set("Content-Type", "application/octet-stream")
+                header.set(Header.Content_Type, ContentType.application_octet_stream)
                 res = {
                     statusCode: 200,
                     reason: "OK",
@@ -61,7 +61,7 @@ const server = net.createServer((socket) => {
             res = {
                 statusCode: 200,
                 reason: "OK",
-                body: req.headers.get("User-Agent"),
+                body: req.headers.get(Header.User_Agent),
                 header: new HttpHeaders()
             }
         }
@@ -75,7 +75,7 @@ const server = net.createServer((socket) => {
             res = { statusCode: 404, reason: "Not Found", header: new HttpHeaders() }
         }
 
-        socket.write(buildResponse(res));
+        socket.write(buildResponse(res,req));
         socket.end();
     })
 
