@@ -23,9 +23,8 @@ export function buildResponse(res: HTTPResponse, req: HttpRequest): string {
     if(req.headers.get(Header.Accept_Encoding)?.includes("gzip")){
         headers.set(Header.Content_Encoding,"gzip")
         const data = Buffer.from(body);
-        const compressedBody = Bun.gzipSync(body,{
-        });
-        body = hexdump(compressedBody)
+        const compressedBody = Bun.gzipSync(body);
+        body = compressedBody
         headers.set(Header.Content_Length,compressedBody.length.toString())
 
     }
