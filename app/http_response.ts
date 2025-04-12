@@ -2,6 +2,7 @@ import { isUint8Array } from "util/types";
 import { CRLF } from "./contants";
 import { ContentType, Header,  HttpHeaders } from "./http_header";
 import type { HttpRequest } from "./http_request";
+import * as net from "net";
 
 export interface HTTPResponse {
     statusCode: number,
@@ -16,7 +17,7 @@ function hexdump (data: Uint8Array, bytesPerLine = 16): string {
     return hex;
   }
 
-export function buildResponse(res: HTTPResponse, req: HttpRequest): string {
+export function writeResponse(res: HTTPResponse, req: HttpRequest,socket:net.Socket): string {
     var body = processResponseBody(res.body);
     const statusLine = `HTTP/1.1 ${res.statusCode} ${res.reason}${CRLF}`;
     const headers = res.header;
@@ -24,7 +25,7 @@ export function buildResponse(res: HTTPResponse, req: HttpRequest): string {
         headers.set(Header.Content_Encoding,"gzip")
         const data = Buffer.from(body);
         const compressedBody = Bun.gzipSync(body);
-        body = compressedBody.toString()
+        body = compressedBody
         headers.set(Header.Content_Length,compressedBody.length.toString())
 
     }
@@ -34,6 +35,9 @@ export function buildResponse(res: HTTPResponse, req: HttpRequest): string {
 
 
     var response = statusLine + headersStr + body;
+    socket.write(statusLine)
+    socket.write(headersStr)
+    socket.write(body)
     console.log("Returning Reponse")
     console.log(response)
     return response;

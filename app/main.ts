@@ -1,6 +1,6 @@
 import * as net from "net";
 import { parseRequest } from "./http_request";
-import { buildResponse, type HTTPResponse } from "./http_response";
+import {  writeResponse, type HTTPResponse } from "./http_response";
 import { url } from "inspector";
 import { ContentType, Header, HttpHeaders } from "./http_header";
 import path from "path";
@@ -75,7 +75,7 @@ const server = net.createServer((socket) => {
             res = { statusCode: 404, reason: "Not Found", header: new HttpHeaders() }
         }
 
-        socket.write(buildResponse(res,req));
+        writeResponse(res,req,socket);
         socket.end();
     })
 
