@@ -24,7 +24,7 @@ export function buildResponse(res: HTTPResponse, req: HttpRequest): string {
         headers.set(Header.Content_Encoding,"gzip")
         const data = Buffer.from(body);
         const compressedBody = Bun.gzipSync(body);
-        body = compressedBody
+        body = compressedBody.toString()
         headers.set(Header.Content_Length,compressedBody.length.toString())
 
     }
